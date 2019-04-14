@@ -13,7 +13,7 @@ let fileList = ["S1E1_5_Writing",
     "S2E3_20_Writing",
     "S2E3_22_Writing"];
 
-let initialDataset = "S1E3_5_Writing";
+let initialDataset = "S1E1_5_Writing";
 
 addDataOptions();
 function addDataOptions() {
@@ -33,35 +33,50 @@ function loadData(){
     let fileName1 = "data/"+fileName+".csv";
     console.log(fileName);
     d3.csv(fileName1, function (error, data) {
+
         let task = data[1].task;
         let devideID = data[1].id;
+        let date = new Date(Date.parse(data[1].time)).toLocaleDateString();
         let obj = {};
 
-        let nested = d3.nest()
-            .key(d => d.sensor)
-            .entries(data)
-            .filter(d => d.key !== "Linear Acceleration");
-
-        nested.forEach(sensor => {
-            sensor.values.forEach(d => {
-                delete d.task;
-                delete d.id;
-                delete d[""];
-                delete d.sensor;
-            })
+        data.forEach(d => {
+            d.id = d[""];
+            d.time = Date.parse(d.time);
+            d.sensor = d.sensor.replace(" ","");
+            delete d.task;
+            delete d[""];
         });
 
-        obj.task = task;
-        obj.id = devideID;
-        obj[nested[0].key.replace(" ", "")] = nested[0].values;
-        obj[nested[1].key.replace(" ", "")] = nested[1].values;
+        // let nested = d3.nest()
+        //     .key(d => d.sensor)
+        //     .entries(data);
+        //
+        // nested.forEach(sensor => {
+        //     sensor.values.forEach(d => {
+        //         d.stamp = d[""];
+        //         d.time = Date.parse(d.time);
+        //         delete d.task;
+        //         delete d.id;
+        //         delete d[""];
+        //         delete d.sensor;
+        //         // delete d.time;
+        //     })
+        // });
+
+        obj.task = task.split(" ")[0];
+        obj.devideID = devideID;
+        obj.date = date;
+        obj.data = data;
+        // obj[nested[0].key.replace(" ", "")] = nested[0].values;
+        // obj[nested[1].key.replace(" ", "")] = nested[1].values;
+        // obj[nested[2].key.replace(" ", "")] = nested[2].values;
         console.log(obj);
 
     });
-    let fileName2 = "data/"+fileName+".json";
-    d3.json(fileName2, function (error, data) {
-        console.log(data);
-    })
+    // let fileName2 = "data/"+fileName+".json";
+    // d3.json(fileName2, function (error, data) {
+    //     console.log(data);
+    // })
 }
 
 function loadNewData() {
