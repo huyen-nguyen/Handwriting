@@ -24,4 +24,16 @@
     pointer-events: all;
 }
 
-/*------ General -------*/
+/*------ Tooltip -------*/
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    width: auto;
+    height: auto;
+    padding: 6px;
+    font: 12px sans-serif;
+    background: #dadada;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+}
