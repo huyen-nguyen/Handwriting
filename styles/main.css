@@ -17,4 +17,11 @@
     left: 300px;
     z-index: 100;
 }
+/*------ Zoom -------*/
+.zoom {
+    cursor: move;
+    fill: none;
+    pointer-events: all;
+}
+
 /*------ General -------*/

@@ -71,6 +71,7 @@ function loadData(){
         // obj[nested[1].key.replace(" ", "")] = nested[1].values;
         // obj[nested[2].key.replace(" ", "")] = nested[2].values;
         console.log(obj);
+        d3.select('#loading').remove();
 
     });
     // let fileName2 = "data/"+fileName+".json";
