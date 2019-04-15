@@ -14,7 +14,22 @@
 <button>update</button>
 <script>
     var origin = [480, 300], j = 10, scale = 20, scatter = [], yLine = [], xGrid = [], beta = 0, alpha = 0, key = function(d){ return d.id; }, startAngle = Math.PI/4;
-    var svg    = d3.select('svg').call(d3.drag().on('drag', dragged).on('start', dragStart).on('end', dragEnd)).append('g');
+
+    var zoom = d3.zoom()
+        // .scaleExtent([1, 10])
+        .on("zoom", zoomed);
+
+    var svg = d3.select('svg')
+        .call(d3.drag()
+            .on('drag', dragged)
+            .on('start', dragStart)
+            .on('end', dragEnd))
+        .append('g')
+        .call(zoom)
+    ;
+
+
+    var container = svg.append("g");
     var color  = d3.scaleOrdinal(d3.schemeCategory20);
     var mx, my, mouseX, mouseY;
 
@@ -45,7 +60,7 @@
 
         /* ----------- GRID ----------- */
 
-        var xGrid = svg.selectAll('path.grid').data(data[0], key);
+        var xGrid = container.selectAll('path.grid').data(data[0], key);
 
         xGrid
             .enter()
@@ -62,7 +77,7 @@
 
         /* ----------- POINTS ----------- */
 
-        var points = svg.selectAll('circle').data(data[1], key);
+        var points = container.selectAll('circle').data(data[1], key);
 
         points
             .enter()
@@ -84,7 +99,7 @@
 
         /* ----------- y-Scale ----------- */
 
-        var yScale = svg.selectAll('path.yScale').data(data[2]);
+        var yScale = container.selectAll('path.yScale').data(data[2]);
 
         yScale
             .enter()
@@ -99,7 +114,7 @@
 
         /* ----------- y-Scale Text ----------- */
 
-        var yText = svg.selectAll('text.yText').data(data[2][0]);
+        var yText = container.selectAll('text.yText').data(data[2][0]);
 
         yText
             .enter()
@@ -151,6 +166,9 @@
         processData(data, 1000);
     }
 
+    function zoomed() {
+        container.attr("transform", d3.event.transform);
+    }
     function dragStart(){
         mx = d3.event.x;
         my = d3.event.y;

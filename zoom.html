@@ -18,13 +18,13 @@
     var width = svgWidth - margin.left - margin.right;
     var height = svgHeight - margin.top - margin.bottom;
 
-    var originalCircle =
-        {"cx" : -150 ,
+    var originalCircle = {"cx" : -150 ,
         "cy" : -15 ,
         "r"  : 20};
+
     // Zoom Function
     var zoom = d3.zoom()
-        .on("zoom", zoomFunction);
+        .on("zoom", zoomed);
 
     var svgViewport = d3.select("body")
         .append('svg')
@@ -32,7 +32,6 @@
         .attr('height', svgHeight)
         .style("background", "red")
         .call(zoom);
-
 
     // create scale objects
     var xAxisScale =d3.scaleLinear()
@@ -46,7 +45,6 @@
     // create axis objects
     var xAxis = d3.axisBottom(xAxisScale);
     var yAxis = d3.axisLeft(yAxisScale);
-
 
 
     // Inner Drawing Space
@@ -77,17 +75,17 @@
         .attr("class", "zoom")
         .attr("width", width)
         .attr("height", height)
-        .call(zoom)
+        .call(zoom);
 
-    function zoomFunction(){
+    function zoomed(){
         // create new scale ojects based on event
-        var new_xScale = d3.event.transform.rescaleX(xAxisScale)
-        var new_yScale = d3.event.transform.rescaleY(yAxisScale)
-        console.log(d3.event.transform.k)
-
-        // update axes
-        gX.call(xAxis.scale(new_xScale));
-        gY.call(yAxis.scale(new_yScale));
+        // var new_xScale = d3.event.transform.rescaleX(xAxisScale)
+        // var new_yScale = d3.event.transform.rescaleY(yAxisScale)
+        // console.log(d3.event.transform)
+        //
+        // // update axes
+        // gX.call(xAxis.scale(new_xScale));
+        // gY.call(yAxis.scale(new_yScale));
 
         // update circle
         circles.attr("transform", d3.event.transform)

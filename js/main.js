@@ -27,7 +27,7 @@ function addDataOptions() {
         el.value = opt;
         select.appendChild(el);
     }
-    document.getElementById('datasetsSelect').value = initialDataset;  //************************************************
+    document.getElementById('datasetsSelect').value = initialDataset;
     fileName = document.getElementById("datasetsSelect").value;
     loadData();
 }
@@ -56,12 +56,11 @@ function loadData(){
             });
             d3.selectAll(".myCheckbox").on("change",init);
 
-            // scatter = data[sensors[0]];
             init();
-
             console.log(data);
         }
-        d3.select('#loading').remove();
+        d3.select('#loading').transition()
+            .duration(200).remove();
     })
 }
 
@@ -97,24 +96,6 @@ function resample(data, window_size, overlap){
         chunksData[length - 2] = chunksData[length - 2].concat(chunksData[length - 1]);
         chunksData.pop();
     }
-
-    // chunksData.forEach((chunk,i) => {
-    //     resampledData[i] = {};
-    //
-    //     let nested = d3.nest()
-    //         .key(d => d.sensor)
-    //         .entries(chunk);
-    //
-    //     nested.forEach(d => {
-    //         resampledData[i][d.key] = average(d.values);
-    //     })
-    //
-    // });
-
-    // console.log(chunksData);
-    // console.log(resampledData);
-
-    // chunksData.forEach(d => console.log(d[d.length-1].time - d[0].time));
 
     return chunksData;
 }
@@ -158,13 +139,15 @@ function average(array){
         sum.z += parseFloat(d.z);
     });
     return {
+        id: array[0].id,
         x: sum.x / array.length,
         y: sum.y / array.length,
         z: sum.z / array.length
     }
 }
+// ________________________________________________________
+// _________________________ PLOT _________________________
 
-// end load data ===========
 
 var origin = [480, 300], j = 10, scale = 20,
     scatter = [],
@@ -172,22 +155,22 @@ var origin = [480, 300], j = 10, scale = 20,
     xGrid = [], beta = 0, alpha = 0, key = function(d){ return d.id; },
     startAngle = Math.PI/4;
 
-var color  = d3.scaleOrdinal(d3.schemeCategory20);
+var color = d3.scaleOrdinal(d3.schemeCategory20);
+
 var mx, my, mouseX, mouseY;
 
 var zoom = d3.zoom()
-    .on("zoom", zoomFunction);
+    .on("zoom", zoomed);
 
 var svg = d3.select('svg')
-    .call(d3.drag().on('drag', dragged)
+    .call(d3.drag()
+        .on('drag', dragged)
         .on('start', dragStart)
         .on('end', dragEnd))
     .append('g')
     .call(zoom)
-    .on("mousedown.zoom", null)
-    .on("touchstart.zoom", null)
-    .on("touchmove.zoom", null)
-    .on("touchend.zoom", null);;
+;
+var container = svg.append("g");
 
 var grid3d = d3._3d()
     .shape('GRID', 20)
@@ -216,7 +199,7 @@ function processData(data, tt){
 
     /* ----------- GRID ----------- */
 
-    var xGrid = svg.selectAll('path.grid').data(data[0], key);
+    var xGrid = container.selectAll('path.grid').data(data[0], key);
 
     xGrid
         .enter()
@@ -233,7 +216,7 @@ function processData(data, tt){
 
     /* ----------- POINTS ----------- */
 
-    var points = svg.selectAll('circle').data(data[1], key);
+    var points = container.selectAll('circle').data(data[1], key);
 
     points
         .enter()
@@ -255,7 +238,7 @@ function processData(data, tt){
 
     /* ----------- y-Scale ----------- */
 
-    var yScale = svg.selectAll('path.yScale').data(data[2]);
+    var yScale = container.selectAll('path.yScale').data(data[2]);
 
     yScale
         .enter()
@@ -270,7 +253,7 @@ function processData(data, tt){
 
     /* ----------- y-Scale Text ----------- */
 
-    var yText = svg.selectAll('text.yText').data(data[2][0]);
+    var yText = container.selectAll('text.yText').data(data[2][0]);
 
     yText
         .enter()
@@ -299,29 +282,19 @@ function posPointY(d){
 }
 
 function init(){
-    var cnt = 0;
     scatter = []; xGrid = []; yLine = [];
     sensors.forEach(sensor => {
         if (document.getElementById(sensor).checked === true){
-            scatter.concat(data[sensor]);
+            scatter = scatter.concat(data[sensor]);
         }
     });
-    console.log(scatter);
 
     for(var z = -j; z < j; z++){
         for(var x = -j; x < j; x++){
             xGrid.push([x, 1, z]);
-            // scatter.push({
-            //     x: x,
-            //     y: d3.randomUniform(0, -10)(),
-            //     z: z,
-            //     id: 'point_' + cnt++
-            // });
         }
     }
-    scatter.forEach((d,i) => {
-        d.id = "point_" + i;
-    });
+
     d3.range(-1, 11, 1).forEach(function(d){ yLine.push([-j, -d, -j]); });
 
     console.log(xGrid);
@@ -336,7 +309,7 @@ function init(){
 
     processData(cdata, 1000);
 }
-
+// ------------------------- Behavior -----------------------------
 function dragStart(){
     mx = d3.event.x;
     my = d3.event.y;
@@ -359,12 +332,6 @@ function dragEnd(){
     mouseX = d3.event.x - mx + mouseX;
     mouseY = d3.event.y - my + mouseY;
 }
-function zoomFunction(){
-    console.log(d3.event.transform);
-
-    // update circle
-    d3.selectAll(".grid").attr("transform", d3.event.transform);
-    d3.selectAll("circle").attr("transform", d3.event.transform);
-    d3.selectAll(".yScale").attr("transform", d3.event.transform);
-    d3.selectAll(".yText").attr("transform", d3.event.transform);
-};
+function zoomed() {
+    container.attr("transform", d3.event.transform);
+}
